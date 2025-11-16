@@ -25,7 +25,7 @@ def main(page: ft.Page):
         ft.Container(
             content=ft.Row(
                 [
-                    # ft.Icon(ft.Icons.SEARCH,size=24,color=ft.Colors.BLACK),
+                    ft.Icon(ft.Icons.REFRESH_OUTLINED,size=24,color=ft.Colors.GREY_600),
                     ft.Icon(ft.Icons.PERSON,size=24,color=ft.Colors.BLACK),
                 ]
             )
@@ -41,9 +41,9 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text("2025-11-15", size=14, color=ft.Colors.BLACK),
+                        ft.Text("周一", size=14, color=ft.Colors.BLACK),
                         ft.Text("多云转晴", color=ft.Colors.BLACK54, size=14),
-                        ft.Text("9°C-18°C", color=ft.Colors.GREEN, size=14),
+                        ft.Text("9°C-18°C", color=ft.Colors.BLACK54, size=14),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=2,
@@ -74,7 +74,7 @@ def main(page: ft.Page):
         )
 
     ft3 = ft.Container( 
-            padding=10,
+            padding=ft.padding.Padding(left=20,top=10,right=0,bottom=0),
             alignment=ft.alignment.center,
             width=page.width,
             bgcolor=ft.Colors.GREY_100,
@@ -92,10 +92,10 @@ def main(page: ft.Page):
                         border_radius=10,  # 圆角半径为宽/高的1/2，使其成为圆形
                         bgcolor=ft.Colors.GREEN,  # 背景颜色设为绿色
                     ),
-                    ft.Text("最新气温", size=12, weight="bold")
+                    ft.Text("当前气温", size=12, color=ft.Colors.GREY_600,weight="bold")
                 ]
                 ),
-                    ft.Text("28°C", color=ft.Colors.BLACK, size=30, weight="bold"),
+                    ft.Text("28°C", color=ft.Colors.BLACK, size=28, weight="bold"),
                     ],        
                 )
                 ),  
@@ -354,7 +354,7 @@ def main(page: ft.Page):
                         )),
                         ft.Container(
                             ft.Row([
-                            ft.Icon(ft.Icons.NIGHTLIGHT,size=14,color=ft.Colors.BLACK),
+                            ft.Icon(ft.Icons.NIGHTLIGHT,size=14,color=ft.Colors.BLUE),
                             ft.Text("18:02", size=14),  
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
