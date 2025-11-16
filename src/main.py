@@ -1,5 +1,25 @@
 import flet as ft
+from api import Weather
 
+loc = "上海"
+weather = Weather()
+locals_id = weather.get_loc_id(loc)
+
+weather_7d = weather.get_weather_7d(locals_id)
+weather_data_7d = weather_7d[0]
+weather_data_sun = weather_7d[1]
+weather_data_temp = weather_7d[2]
+
+weather_data_24h = weather.get_weather_24h(locals_id)
+
+weather_now = weather.get_weather(locals_id)
+temp,feels_like,text, wind_dir_scale, wind_speed,humidity,precip,vis,cloud = weather_now
+
+def get_color(val):
+    if val >= 170: return ft.Colors.RED
+    if val >= 130: return ft.Colors.ORANGE
+    if val <= 50: return ft.Colors.GREEN
+    return ft.Colors.BLUE
 
 def main(page: ft.Page):
     # page.vertical_alignment = ft.MainAxisAlignment.CENTER
@@ -41,9 +61,9 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Column(
                     [
-                        ft.Text("周一", size=14, color=ft.Colors.BLACK),
-                        ft.Text("多云转晴", color=ft.Colors.BLACK54, size=14),
-                        ft.Text("9°C-18°C", color=ft.Colors.BLACK54, size=14),
+                        ft.Text(item["week"], size=14, color=ft.Colors.BLACK),
+                        ft.Text(item["weather"], color=ft.Colors.BLACK54, size=14),
+                        ft.Text(item["temp"], color=ft.Colors.BLACK54, size=14),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=2,
@@ -58,7 +78,7 @@ def main(page: ft.Page):
                 ink=True,  # 点击水波纹效果
                 # on_click=lambda e: print(f"点击了项目 {i}")
             )
-            for i in range(1, 8)
+            for item in weather_data_7d
         ],
         spacing=10,          # Container 之间的间距
         scroll="hidden",         # ✅ 关键：启用水平滚动
@@ -81,7 +101,16 @@ def main(page: ft.Page):
             height=80,
             border_radius=12,
                 )
-    progress_value = 100  # 示例中的进度为75%
+    temp_int = temp.split("°C")[0]
+    if temp_int != "0":
+        temp_num = int(temp_int)
+        if temp_num > 0:
+            progress_value = temp_num / 50 * 200 # 进度条进度
+        elif temp_num < 0:
+            progress_value = abs(abs(temp_num) / 50 * 200)
+    else:
+        progress_value = 50
+    # progress_value = 150 # 进度条进度
     ft3.content = ft.Row([
         ft.Container(
             content=ft.Column(
@@ -90,12 +119,14 @@ def main(page: ft.Page):
                         width=10,  # 宽度
                         height=10,  # 高度
                         border_radius=10,  # 圆角半径为宽/高的1/2，使其成为圆形
-                        bgcolor=ft.Colors.GREEN,  # 背景颜色设为绿色
+                        bgcolor=ft.Colors.RED if int(temp_int) >= 35 else \
+                                ft.Colors.ORANGE if int(temp_int) >= 20 else \
+                                ft.Colors.GREEN
                     ),
                     ft.Text("当前气温", size=12, color=ft.Colors.GREY_600,weight="bold")
                 ]
                 ),
-                    ft.Text("28°C", color=ft.Colors.BLACK, size=28, weight="bold"),
+                    ft.Text(temp, color=ft.Colors.BLACK, size=28, weight="bold"),
                     ],        
                 )
                 ),  
@@ -108,7 +139,7 @@ def main(page: ft.Page):
             content=ft.Container(
                 width=(progress_value / 100) * 100,  # 根据进度值计算宽度
                 height=10,
-                bgcolor=ft.Colors.GREEN,  # 已完成部分的颜色
+                bgcolor=get_color(progress_value),  # 已完成部分的颜色
                 border_radius=10,  # 确保已完成部分也是圆角
         )
         )
@@ -120,17 +151,17 @@ def main(page: ft.Page):
     scrollable_items = [
         ft.Container(
             content=ft.Column([
-                ft.Text("18:00", size=12, weight="bold"),
-                ft.Icon(ft.Icons.WB_SUNNY, size=20, color=ft.Colors.ORANGE_500),
-                ft.Text("25°C", size=12),
+                ft.Text(item['time'], size=12, weight="bold"),
+                ft.Text(item['weather'], size=12, color=ft.Colors.BLUE_800),
+                ft.Text(item['temp'], size=12),
             ], alignment=ft.MainAxisAlignment.CENTER, spacing=4),
-            padding=10,
+            padding=12,
             bgcolor=ft.Colors.BLUE_50,
             border_radius=8,
-            width=60,
+            width=70,
             alignment=ft.alignment.center,
         )
-        for _ in range(10)  # 生成10个可滑动项
+        for item in weather_data_24h
     ]
     ft4 = ft.Container(
             padding=10,
@@ -156,7 +187,7 @@ def main(page: ft.Page):
                             ft.Row([
                                 ft.Text("我的位置", size=18, color=ft.Colors.GREY_600, weight="bold"),
                                 ft.Icon(ft.Icons.LOCATION_ON,size=16,color=ft.Colors.GREY_600),
-                                ft.Text("上海", size=16),   
+                                ft.Text(loc, size=16),   
                             ],
                             alignment=ft.MainAxisAlignment.START,
                             )),
@@ -165,7 +196,7 @@ def main(page: ft.Page):
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.WB_SUNNY,size=16,color=ft.Colors.YELLOW_900),
-                            ft.Text("多云转晴，微风", size=14) 
+                            ft.Text(text, size=14) 
                         ],
                         # alignment=ft.MainAxisAlignment.START,
                         )),
@@ -174,14 +205,14 @@ def main(page: ft.Page):
                                 ft.Container(
                                     ft.Column([
                                     ft.Icon(ft.Icons.THERMOSTAT,size=16,color=ft.Colors.RED),
-                                    ft.Text("28°C", size=14) 
+                                    ft.Text(temp, size=14) 
                                 ],
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 )),
                                 ft.Container(
                                     ft.Column([
                                     ft.Icon(ft.Icons.WATER_DROP,size=16,color=ft.Colors.BLUE),
-                                    ft.Text("湿度60%", size=14) 
+                                    ft.Text(humidity, size=14) 
                                 ],
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 )),
@@ -194,22 +225,22 @@ def main(page: ft.Page):
                             ft.Row([
                                 ft.Container(
                                     ft.Column([
-                                    ft.Icon(ft.Icons.THERMOSTAT,size=16,color=ft.Colors.GREEN),# 最低温度
-                                    ft.Text("12°C", size=14) 
+                                    ft.Icon(ft.Icons.THERMOSTAT,size=16,color=ft.Colors.RED),# 最低温度
+                                    ft.Text(weather_data_temp["temp_max"], size=14) 
                                 ],
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 )),
                                 ft.Container(
                                     ft.Column([
-                                    ft.Icon(ft.Icons.THERMOSTAT,size=16,color=ft.Colors.RED),# 最高温度
-                                    ft.Text("18°C", size=14) 
+                                    ft.Icon(ft.Icons.THERMOSTAT,size=16,color=ft.Colors.GREEN),# 最高温度
+                                    ft.Text(weather_data_temp["temp_min"], size=14) 
                                 ],
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 )),
                                 ft.Container(
                                     ft.Column([
-                                    ft.Icon(ft.Icons.THERMOSTAT,size=16,color=ft.Colors.RED),#体感温度
-                                    ft.Text("18°C", size=14) 
+                                    ft.Icon(ft.Icons.PERSON_OUTLINE,size=16,color=ft.Colors.GREEN_200),#体感温度
+                                    ft.Text(feels_like, size=14) 
                                 ],
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 )),
@@ -229,7 +260,7 @@ def main(page: ft.Page):
                     border_radius=12,
                     padding=10,
                     content=ft.Column([
-                        ft.Text("预计四小时后会天黑", size=12, color=ft.Colors.GREY_600, weight="bold"),
+                        ft.Text("近24小时天气预报", size=12, color=ft.Colors.GREY_600, weight="bold"),
                         ft.Divider(color=ft.Colors.GREY_300, height=1, thickness=1), 
                         ft.Container(
                             content=ft.ListView(
@@ -263,14 +294,14 @@ def main(page: ft.Page):
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.VISIBILITY,size=14,color=ft.Colors.GREEN),
-                            ft.Text("30km", size=14)
+                            ft.Text(vis, size=14)
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         )),
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.CLOUD,size=14,color=ft.Colors.BLUE),
-                            ft.Text("60%", size=14),  
+                            ft.Text(cloud, size=14),  
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         ),),
@@ -278,7 +309,7 @@ def main(page: ft.Page):
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.WATER_DROP,size=14,color=ft.Colors.GREEN_500),
-                            ft.Text("18mm", size=14)
+                            ft.Text(precip, size=14)
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         ))
@@ -299,14 +330,14 @@ def main(page: ft.Page):
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.AIR,size=14,color=ft.Colors.GREEN_500),
-                            ft.Text("东北风2级", size=14)
+                            ft.Text(wind_dir_scale, size=14)
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         )),
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.COMPASS_CALIBRATION,size=14,color=ft.Colors.AMBER_700),
-                            ft.Text("27km/h", size=14),  
+                            ft.Text(wind_speed, size=14),  
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         ),
@@ -348,14 +379,14 @@ def main(page: ft.Page):
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.WB_SUNNY,size=14,color=ft.Colors.YELLOW_900),
-                            ft.Text("05:01", size=14)
+                            ft.Text(weather_data_sun['sunrise'], size=14)
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         )),
                         ft.Container(
                             ft.Row([
                             ft.Icon(ft.Icons.NIGHTLIGHT,size=14,color=ft.Colors.BLUE),
-                            ft.Text("18:02", size=14),  
+                            ft.Text(weather_data_sun['sunset'], size=14),  
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         ),
@@ -370,10 +401,18 @@ def main(page: ft.Page):
     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,  # 关键：两端对齐
     spacing=10,
     )
-
+    ft5 = ft.Container(
+            # padding=ft.padding.Padding(left=0,top=0,right=0,bottom=0),
+            alignment=ft.alignment.center,
+            width=page.width,
+            # bgcolor=ft.Colors.GREY_100,
+            height=20,
+            border_radius=12,
+            content=ft.Column([ft.Text("数据来源于和风天气", size=12,color=ft.Colors.BLUE_GREY_300)])
+                ) 
     # 定义导航栏项目
     nav_items = [
-        ft.NavigationBarDestination(icon=ft.Icons.HOME, label="Home"),
+        ft.NavigationBarDestination(icon=ft.Icons.HOME, label="天气"),
         ft.NavigationBarDestination(icon=ft.Icons.BUSINESS, label="Business"),
         ft.NavigationBarDestination(icon=ft.Icons.SCHOOL, label="School"),
     ]
@@ -382,11 +421,14 @@ def main(page: ft.Page):
     def on_navigation_change(e):
         index = e.control.selected_index
         if index == 0:
-            print("Home Page")
+            # print("Home Page")
+            pass
         elif index == 1:
-            print("Business Page")
+            # print("Business Page")
+            pass
         elif index == 2:
-            print("School Page")
+            # print("School Page")
+            pass
         page.update()
 
     # 创建导航栏
@@ -401,6 +443,6 @@ def main(page: ft.Page):
     # 将导航栏添加到页面底部
     page.navigation_bar = navigation_bar
 
-    page.add(ft.Column(controls=[ft1,ft2,ft3,ft4]))
+    page.add(ft.Column(controls=[ft1,ft2,ft3,ft4,ft5]))
 
 ft.app(target=main)
