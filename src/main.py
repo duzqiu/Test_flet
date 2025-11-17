@@ -1,7 +1,7 @@
 import flet as ft
 from api import Weather
 
-loc = "上海"
+loc = "浦东"
 weather = Weather()
 locals_id = weather.get_loc_id(loc)
 
@@ -181,13 +181,13 @@ def main(page: ft.Page):
                     height=220,
                     bgcolor=ft.Colors.WHITE,
                     border_radius=12,
-                    padding=10,
+                    padding=6,
                     content=ft.Column([
                         ft.Container(
                             ft.Row([
                                 ft.Text("我的位置", size=18, color=ft.Colors.GREY_600, weight="bold"),
-                                ft.Icon(ft.Icons.LOCATION_ON,size=16,color=ft.Colors.GREY_600),
-                                ft.Text(loc, size=16),   
+                                ft.Icon(ft.Icons.LOCATION_ON,size=14,color=ft.Colors.GREY_600),
+                                ft.Text(loc, size=14),   
                             ],
                             alignment=ft.MainAxisAlignment.START,
                             )),
