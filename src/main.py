@@ -446,3 +446,5 @@ def main(page: ft.Page):
     page.add(ft.Column(controls=[ft1,ft2,ft3,ft4,ft5]))
 
 ft.app(target=main)
+
+
